@@ -1,9 +1,57 @@
 var express = require('express');
 var router = express.Router();
+var mysql = require('mysql');
+var pool = mysql.createPool({
+	connectionLimit:5,
+	host:'localhost',
+	user:'root',
+	database:'watchshop',
+	password:'309qkfsoa'
+});
+
+var session = require('express-session');
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  //console.log(req.rows.name);
+  console.log(req.session.authid);
+
+  if(req.session.authid == undefined){
+  	res.render('index', { title: 'WATCH SHOP' });
+  }
+  else{
+  	res.redirect('/main');
+  }
+});
+
+
+
+router.post('/',function(req,res,next){
+	var id = req.body.member_id;
+	var passwd = req.body.member_passwd;
+
+	pool.getConnection(function(err,connection){
+		var sqlForSelectList = "SELECT * FROM member WHERE id = ? and passwd = ?";
+		connection.query(sqlForSelectList,[id, passwd], function(err, result){
+			if(err) console.error("err: "+err);
+			//console.log(result);
+			if(result == "") {
+				res.send("<script>alert('아이디 혹은 비밀번호가 일치하지 않습니다');history.back();</script>");
+			}
+			else{
+				rows = result;
+			}
+			req.session.authid = id;
+			req.session.authadmin = result.admin;
+			req.session.save(function(){
+				res.redirect('/main');
+			});
+			connection.release(); 
+		});
+
+	});
+
 });
 
 module.exports = router;

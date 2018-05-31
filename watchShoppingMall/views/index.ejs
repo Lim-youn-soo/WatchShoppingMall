@@ -1,11 +1,52 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+﻿<!Doctype html>
+<html class="main" lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
+	<title><%= title %></title>
+	<style>
+	.default{
+		text-align: center;
+	}
+
+	.loginbox{
+		margin-top:10%;
+	}
+
+</style>
+	<script src="/javascripts/jquery-3.3.1.min.js"></script>
+	<script>;
+		function login(){
+			if($("#member_id").val() ==""){
+				alert("아이디를 입력하세요");
+				$("#member_id").focus();
+				return;
+			}
+			if($("#member_passwd").val()==""){
+				alert("비밀번호를 입력하세요");
+				$("#member_passwd").focus();
+				return;
+			};
+
+		}
+
+	</script>
+</head>
+
+<body class="default">
+	<div class="loginbox">
+		<b>WATCH SHOP</b>
+		<form id ="login" action = "/" method="post" onsubmit="return login()">
+			<p><input name ="member_id" id="member_id" type="id" placeholder="아이디" id="member_id"></p>
+			<p><input name="member_passwd" id="member_passwd" type="password" placeholder="비밀번호" id="member_pwd"></p>
+
+			<p><button type="submit()">로그인</button>
+				<a href="#">회원가입</a>
+			</p>
+
+		</form>
+
+	</div>
+
+</body>
 </html>
