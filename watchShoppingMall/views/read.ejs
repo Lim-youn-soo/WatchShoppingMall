@@ -22,6 +22,10 @@
 
 <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
+
+
+
+
 </head>
 
 <body>
@@ -88,12 +92,12 @@
 			</div>
 			<div class="row">
 				<div class="col-lg-12 col-md-12 mb-12">
-					<form action="/main/write" method="post" enctype="multipart/form-data" onsubmit="return check()">
+					<form action="/main/update" method="post" enctype="multipart/form-data">
 						<div class="card h-100">
 							<a href="#"></a>
 							<div class="card-body">
 								<h4 class="card-title">
-									<b>상품 등록</b>
+									<b><%= row.name %></b>
 								</h4>
 								<hr>
 								<h5></h5>
@@ -101,35 +105,29 @@
 									<div  class="table-responsive" >
 										<table style="width:100%" class="table table-striped">
 											<tr class="active">
-												<td><b>상품명</b></td>
+												<td><b>사진</b></td>
 											</tr>
 
 											<tr>
-												<td><input type="text" id="name" name="name"/></td>
+												<td><img src='/images/<%=row.img %>' alt='이미지가 없습니다' /></td>
 											</tr>
 											<tr>
 												<td><b>브랜드명</b></td>
 											</tr>
 											<tr> 
-												<td><input type="text" id="brandname" name="brandname" /></td>
+												<td><%= row.brandname %></td>
 											</tr>
 											<tr>
 												<td><b>가격</b></td>
 											</tr>
 											<tr> 
-												<td><input type="text" id="price" name="price" />원</td>
+												<td><%=row.price %>원</td>
 											</tr>
 											<tr>
 												<td><b>상세정보</b></td>
 											</tr>
 											<tr>
-												<td><textarea id="information" name="information" style="width:80%"></textarea></td>
-											</tr>
-											<tr>
-												<td><b>이미지</b></td>		
-											</tr>
-											<tr>
-												<td><input type="file" name="file" id="file" /></td>
+												<td><%=row.information%></td>
 											</tr>
 
 										</table>
@@ -137,20 +135,30 @@
 								</p>
 							</div>
 							<div class="card-footer">
-								<small class="text-muted"><button type="submit">등록</button></small>
-							</div>
+								<% if(authadmin == 1){
+								%>
+								<small class="text-muted"><button type="submit">수정</button></small>
+								<small class="text-muted"><button type="button" id="delete">삭제</button></small>
+								<% }else{			
+								%>
+								<small class="text-muted"><button type="submit">구매</button></small>
+								<%
+							}
+							%>
 						</div>
-					</form>
-				</div>
-
+					</div>
+				</form>
 			</div>
-			<!-- /.row -->
 
 		</div>
-		<!-- /.col-lg-9 -->
+		<!-- /.row -->
 
 	</div>
-	<!-- /.row -->
+	<!-- /.col-lg-9 -->
+
+
+</div>
+<!-- /.row -->
 
 </div>
 <!-- /.container -->
@@ -163,53 +171,27 @@
 	<!-- /.container -->
 </footer>
 
+<form id="deleteProduct" method="post" action ="/main/delete" >
+	<input type="hidden" id="no" name="no" value="<%=row.no%>"></input>
+	<input type="hidden" id="img" name="img" value="<%=row.img%>"></input>
+</form>
+
 <!-- Bootstrap core JavaScript -->
 <script src="/javascripts/jquery-3.3.1.min.js"></script>
 <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
-	function check(){
-		if($("#name").val().trim() ==""){
-			var message ="상품명을 입력하세요";
-			$("#name").val("");
-			$("#name").focus();
-			alert(message);
-			return false;
+	$("#delete").click(function(){
+		//alert("a");
+		var con = confirm("<%= row.name %>을 정말 삭제하시겠습니까?");
+		if(con == true){
+			
+			$("#deleteProduct").submit();
+			
 		}
-		if($("#brandname").val().trim() ==""){
-			var message ="브랜드명을 입력하세요";
-			$("#brandname").val("");
-			$("#brandname").focus();
-			alert(message);
-			return false;
+		else if(con == false){
+			return;
 		}
-		if($("#price").val().trim() ==""){
-			var message ="가격을 입력하세요";
-			$("#price").val("");
-			$("#price").focus();
-			alert(message);
-			return false;
-		}
-		if($("#information").val().trim() ==""){
-			var message ="상품 정보를 입력하세요";
-			$("#information").val("");
-			$("#information").focus();
-			alert(message);
-			return false;
-		}
-		if($("#file").val().trim() ==""){
-			var message ="사진을 넣어주세요";
-			alert(message);
-			return false;
-		}
-	}
-
-	document.addEventListener('keydown', function (event) {
-		if (event.keyCode === 13 && event.target.nodeName === 'INPUT') {
-			var form = event.target.form;
-			var index = Array.prototype.indexOf.call(form, event.target);
-			form.elements[index + 1].focus();
-			event.preventDefault();
-		}
+		
 	});
 </script>
 
