@@ -34,20 +34,24 @@ router.post('/',function(req,res,next){
 	pool.getConnection(function(err,connection){
 		var sqlForSelectList = "SELECT * FROM member WHERE id = ? and passwd = ?";
 		connection.query(sqlForSelectList,[id, passwd], function(err, result){
-			if(err) console.error("err: "+err);
-			//console.log(result);
-			if(result == "") {
-				res.send("<script>alert('아이디 혹은 비밀번호가 일치하지 않습니다');history.back();</script>");
+			if(err) console.error("errrrrrrr: "+err);
+			
+			if(result =="") {
+				//res.send("<script>alert('아이디 혹은 비밀번호가 일치하지 않습니다');history.back();</script>");
+				connection.release();
+				res.redirect('/');
 			}
 			else{
 				rows = result;
-			}
+			
 			req.session.authid = id;
-			req.session.authadmin = result.admin;
+			req.session.authadmin = result[0].admin;
+			connection.release(); 
 			req.session.save(function(){
 				res.redirect('/main');
 			});
-			connection.release(); 
+			
+			}
 		});
 
 	});

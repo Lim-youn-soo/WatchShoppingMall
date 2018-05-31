@@ -11,26 +11,80 @@ var pool = mysql.createPool({
 var session = require('express-session');
 var app = express();
 
+var multipart = require('connect-multiparty');
+var multipartMiddleware = multipart({
+    uploadDir: './public/images' 
+});
+
+var fs = require("fs");
+
 
 router.get('/', function (req, res, next) {
 	if(req.session.authid == undefined){
-		res.redirect('/index');
+		res.redirect('/');
 	}
 	else{
 	console.log(req.session.authid);
 	console.log(req.session.authadmin);
 	
     pool.getConnection(function(err,connection){
-    	var sqlForSelectList = "SELECT no, name, price, information, hit, img FROM product WHERE hit =0";
+    	var sqlForSelectList = "SELECT no, name, price, information, hit, img FROM product WHERE hit=0";
     	connection.query(sqlForSelectList, function(err, rows){
     		if(err) console.error("err: "+err);
     		console.log("rows : " + JSON.stringify(rows));
-    		res.render('main', {title: 'WATCH SHOP', rows:rows});
+    		res.render('main', {title: 'WATCH SHOP', rows:rows, authid: req.session.authid, authadmin:req.session.authadmin});
     		connection.release(); 
     	});
 
     });
   }  
+});
+
+router.get('/write', function(req, res, next){
+	if(req.session.authid == undefined){
+		res.redirect('/');
+	}
+	else 
+	res.render('write', {title:'WATCH SHOP',rows:rows, authid: req.session.authid, authadmin:req.session.authadmin});
+
+});
+
+router.post('/write', multipartMiddleware, function(req, res, next){
+    console.log("aaa");
+    var img = req.files['file'];
+ 
+    var name = req.body.name;
+    var brandname = req.body.brandname;
+    var price = req.body.price;
+    var information = req.body.information;
+    var datas = [name, brandname, price, information, 0, 0, img.originalFilename];
+
+    fs.rename(img.path, './public/images/' + img.originalFilename, function (err) {
+        if (err) throw err;
+        console.log('renamed complete');
+    });
+
+    //console.log(datas);
+    pool.getConnection(function (err, connection) {
+        var sqlForInsertBoard = "insert into product(name, brandname, price, information, useflag, hit, img) value(?,?,?,?,?,?,?)";
+        connection.query(sqlForInsertBoard, datas, function (err, rows) {
+            if (err) console.log("err : " + err);
+
+            res.redirect('/main');
+            connection.release();
+        });
+    });
+
+
+
+});
+
+router.get('/logout', function(req, res,next){
+		delete req.session.authid;
+		delete req.session.authadmin;
+		req.session.save(function(){
+			res.redirect('/');
+		});
 });
 
 module.exports = router;
