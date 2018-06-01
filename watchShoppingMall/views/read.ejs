@@ -94,7 +94,7 @@
 				<div class="col-lg-12 col-md-12 mb-12">
 					<% if(authadmin == 1){
 					%>
-					<form action="/main/update" method="post" id="updateform">
+					<form action="/main/update" method="get" id="updateForm">
 						<% } else { 
 						%>
 						<form action="/main/buy" method="post" id="buyform">
@@ -103,6 +103,12 @@
 						%>
 						<input type="hidden" id="buyDate" name="buyDate" value=""></input>
 						<input type="hidden" id="product_no" name="product_no" value="<%=row.no%>"></input>
+						<input type="hidden" id="name" name="name" value="<%= row.name%>"></input>
+						<input type="hidden" id="brandname" name="brandname" value="<%= row.brandname%>"></input>
+						<input type="hidden" id="price" name="price" value="<%= row.price%>"></input>
+						<input type="hidden" id="img" name="img" value="<%= row.img%>"></input>
+						<input type="hidden" id="information" name="information" value="<%= row.information%>"></input>
+
 						<div class="card h-100">
 							<a href="#"></a>
 							<div class="card-body">
@@ -119,7 +125,7 @@
 											</tr>
 
 											<tr>
-												<td><img style="width:100%" src='/images/<%=row.img %>' alt='이미지가 없습니다' /></td>
+												<td><img style="width:100%" src='/images/<%=row.img %>' alt='이미지가 없습니다'/></td>
 											</tr>
 											<tr>
 												<td><b>브랜드명</b></td>
@@ -224,6 +230,7 @@
 	<input type="hidden" id="reviewDate" name="reviewDate" value=""></input>
 </form>
 
+
 <!-- Bootstrap core JavaScript -->
 <script src="/javascripts/jquery-3.3.1.min.js"></script>
 <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -266,9 +273,8 @@
 	});
 
 	$("#updateButton").click(function(){
-
-
-
+		//alert("a");
+		$("#updateForm").submit();
 	});
 
 </script>

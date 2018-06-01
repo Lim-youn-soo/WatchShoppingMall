@@ -115,12 +115,51 @@ router.get('/logout', function(req, res,next){
 	});
 });
 
-router.post('/update', function(req, res, next){
-	delete req.session.authid;
-	delete req.session.authadmin;
-	req.session.save(function(){
+router.get('/update',function(req, res, next){
+	if(req.session.authid == undefined){
 		res.redirect('/');
+	}
+	else{
+		console.log(req.query);
+		var no = req.query.product_no;
+		var name = req.query.name;
+		var brandname = req.query.brandname;
+		var img = req.query.img;
+		var price = req.query.price;
+		var information = req.query.information;
+		res.render('update',{title:'WATCH SHOP', authid: req.session.authid, authadmin:req.session.authadmin, no:no, name:name, brandname:brandname, img:img, price:price, information:information});
+		//res.redirect('/main');
+	}
+});
+
+
+router.post('/update',multipartMiddleware, function(req, res, next){
+	var no = req.body.product_no;
+	var name = req.body.name;
+	var brandname = req.body.brandname;
+	var price = req.body.price;
+	var information = req.body.information;
+	var img = req.files['file'];
+	var dataset = [name,brandname,price,information,img.originalFilename,no];
+	console.log(brandname);
+
+	fs.rename(img.path, './public/images/' + img.originalFilename, function (err) {
+		if (err) throw err;
+		else console.log('renamed complete');
 	});
+
+	pool.getConnection(function (err, connection) {
+		var sql ="update product set name=?,brandname=?,price=?,information=?,img=? where no = ?";
+		connection.query(sql,dataset, function(err, result){
+			if(err) console.error("수정 중 에러 발생 err: ",err);
+			else{
+				connection.release();
+				res.redirect('/main/read/'+no);
+			}
+		});
+	});	
+
+
 });
 
 router.get('/delete', function(req, res,next){
