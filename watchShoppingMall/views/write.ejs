@@ -88,8 +88,8 @@
 			</div>
 			<div class="row">
 				<div class="col-lg-12 col-md-12 mb-12">
-					<form action="/main/write" method="post" enctype="multipart/form-data" onsubmit="return check()">
-						<div class="card h-100">
+					<form action="/main/write" method="post" enctype="multipart/form-data" id="registerForm">
+						<div class="card h-100">l
 							<a href="#"></a>
 							<div class="card-body">
 								<h4 class="card-title">
@@ -133,11 +133,12 @@
 											</tr>
 
 										</table>
+										<input type="hidden" name="date" id="date" value=""/>
 									</div>
 								</p>
 							</div>
 							<div class="card-footer">
-								<small class="text-muted"><button type="submit">등록</button></small>
+								<small class="text-muted"><button type="button" id="registerButton">등록</button></small>
 							</div>
 						</div>
 					</form>
@@ -167,7 +168,9 @@
 <script src="/javascripts/jquery-3.3.1.min.js"></script>
 <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
-	function check(){
+	var dateObject = new Date();
+
+	$("#registerButton").click(function(){
 		if($("#name").val().trim() ==""){
 			var message ="상품명을 입력하세요";
 			$("#name").val("");
@@ -201,16 +204,16 @@
 			alert(message);
 			return false;
 		}
-	}
+		var date = dateObject.getFullYear() +"년 " + (dateObject.getMonth()+1) +"월 " + dateObject.getDate() +"일 " + dateObject.getHours() + "시 " + dateObject.getMinutes() +"분 ";
+		alert(date);
 
-	document.addEventListener('keydown', function (event) {
-		if (event.keyCode === 13 && event.target.nodeName === 'INPUT') {
-			var form = event.target.form;
-			var index = Array.prototype.indexOf.call(form, event.target);
-			form.elements[index + 1].focus();
-			event.preventDefault();
-		}
+		$("#date").val(date); 
+		//alert($("#date").val());
+
+		$("#registerForm").submit();
 	});
+
+
 </script>
 
 

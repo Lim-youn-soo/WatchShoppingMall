@@ -28,7 +28,7 @@ router.get('/', function (req, res, next) {
 		console.log(req.session.authadmin);
 
 		pool.getConnection(function(err,connection){
-			var sqlForSelectList = "SELECT no, name, price, information, hit, img FROM product WHERE hit=0";
+			var sqlForSelectList = "SELECT no, name, price, information, hit, img FROM product WHERE useflag=0";
 			connection.query(sqlForSelectList, function(err, rows){
 				if(err) console.error("err: "+err);
 				console.log("rows : " + JSON.stringify(rows));
@@ -57,7 +57,8 @@ router.post('/write', multipartMiddleware, function(req, res, next){
 	var brandname = req.body.brandname;
 	var price = req.body.price;
 	var information = req.body.information;
-	var datas = [name, brandname, price, information, 0, 0, img.originalFilename];
+	var date = req.body.date;
+	var datas = [name, brandname, price, information, 0,  img.originalFilename,0,date];
 
 	fs.rename(img.path, './public/images/' + img.originalFilename, function (err) {
 		if (err) throw err;
@@ -66,7 +67,7 @@ router.post('/write', multipartMiddleware, function(req, res, next){
 
     //console.log(datas);
     pool.getConnection(function (err, connection) {
-    	var sqlForInsertBoard = "insert into product(name, brandname, price, information, useflag, hit, img) value(?,?,?,?,?,?,?)";
+    	var sqlForInsertBoard = "insert into product(name, brandname, price, information, hit, img, useflag,date) value(?,?,?,?,?,?,?,?)";
     	connection.query(sqlForInsertBoard, datas, function (err, rows) {
     		if (err) console.log("err : " + err);
 
@@ -86,12 +87,18 @@ router.get('/read/:no', function(req, res, next){
 	else{
 		var no = req.params.no;
 		pool.getConnection(function (err, connection) {
-			var sql = "select no, name, brandname, price, information, hit, img from product where no=? and useflag =0";
+			var sql = "select no, name, brandname, price, information, hit, img, date from product where no=? and useflag =0";
 			connection.query(sql, [no], function (err, row) {
 				if (err) console.error(err);
 
-				res.render('read', { title: "WATCH SHOP", row: row[0],authid: req.session.authid, authadmin:req.session.authadmin});
-				connection.release();
+				var sql ="select member_id, value, date from review where product_no =?"
+				connection.query(sql, [no], function(err, review){
+					if(err) console.error(err);
+					res.render('read', { title: "WATCH SHOP", row: row[0], review:review, authid: req.session.authid, authadmin:req.session.authadmin});
+					connection.release();
+
+				})
+
 
 			});
 
@@ -143,15 +150,93 @@ router.post('/delete', function(req, res, next){
 		pool.getConnection(function (err, connection) {
 			var sql = "delete from product where no=?";
 			connection.query(sql, [no], function (err, result) {
-				if (err) console.err("글 삭제 중 에러 발생 err: ", err);
-				else res.redirect('/main');
-				connection.release();
+				if (err) console.error("글 삭제 중 에러 발생 err: ", err);
+				else {
+					sql = "delete from review where product_no=?";
+					connection.query(sql,[no], function(err, result2){
+						if(err) console.error("리뷰 삭제 중 에러 발생 err:" + err);
+						else{
+							res.redirect('/main');
+							connection.release();
+						}
+					});
+
+
+				}
 
 			});
 		});
 
 
 	}
+});
+
+router.get('/buy', function(req, res, next){
+	if(req.session.authid == undefined){
+		res.redirect('/');
+	}
+	else{
+		res.redirect('/main');
+	}
+});
+
+
+router.post('/buy', function(req,res,next){
+	if(req.session.authid == undefined){
+		res.redirect('/');
+	}
+	else{
+		console.log(req.body);
+		var member_no = req.session.authno;
+		var product_no = req.body.product_no;
+		var date = req.body.buyDate;
+		//console.log(req.body);
+		pool.getConnection(function (err, connection) {
+			var sql = "insert into history(member_no, product_no, date) value(?,?,?)";
+			connection.query(sql, [member_no, product_no, date], function (err, result) {
+				if (err) console.error("구매 중 에러 발생 err: ", err);
+				else {
+
+					sql = "update product set hit = hit+1 where no=?"
+					connection.query(sql, [product_no], function (err, result) {
+						if (err) console.error("히트 수 조작 중 에러 발생 err: ", err);
+						else{
+							connection.release();	
+							res.redirect('/main');
+						}
+
+					});
+				}
+			});
+		});	
+	}
+
+
+});
+
+router.post('/review',function(req, res, next){
+	if(req.session.authid == undefined){
+		res.redirect('/');
+	}
+	else{
+		var no = req.body.reviewNo;
+		var id = req.body.reviewId;
+		var review = req.body.reviewValue;
+		var date = req.body.reviewDate;
+
+		pool.getConnection(function (err, connection) {
+			var sql = "insert into review(product_no, member_id,value, date) value(?,?,?,?)";
+			connection.query(sql, [no, id, review,date], function (err, result) {
+				if (err) console.error("구매 중 에러 발생 err: ", err);
+				else {
+					res.redirect('/main/read/'+no);
+
+				}
+			});
+		});	
+
+	}
+
 });
 
 module.exports = router;

@@ -44,8 +44,10 @@ router.post('/',function(req,res,next){
 			else{
 				rows = result;
 			
+			req.session.authno = result[0].no;
 			req.session.authid = id;
 			req.session.authadmin = result[0].admin;
+
 			connection.release(); 
 			req.session.save(function(){
 				res.redirect('/main');
