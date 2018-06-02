@@ -178,13 +178,13 @@ router.post('/delete', function(req, res, next){
 	else{
 		var no = req.body.no;
 		var img = req.body.img;
-
+		/*
 		fs.unlink('./public/images/'+img, function (err) {
 			if (err) console.log(err);
 			console.log("successfully deleted ");
 
 		});
-
+*/
 
 		pool.getConnection(function (err, connection) {
 			var sql = "delete from product where no=?";
@@ -268,6 +268,7 @@ router.post('/review',function(req, res, next){
 			connection.query(sql, [no, id, review,date], function (err, result) {
 				if (err) console.error("구매 중 에러 발생 err: ", err);
 				else {
+					connection.release();
 					res.redirect('/main/read/'+no);
 
 				}
@@ -277,5 +278,32 @@ router.post('/review',function(req, res, next){
 	}
 
 });
+
+router.get('/info', function(req, res, next){
+	if(req.session.authid == undefined){
+		res.redirect('/');
+	}
+	else{
+		var id = req.session.authid;
+
+		pool.getConnection(function(err, connection){
+			var sql = "call curdemo(?);";
+			connection.query(sql, [id], function(err, result){
+				if(err)console.error("회원 번호 불러오는 중 에러 발생 err: " ,err);
+				else{
+					
+
+					res.render('info', {title:'WATCH SHOP', result:JSON.stringify(result[0]), authid:req.session.authid, authadmin:req.session.authadmin})
+
+				}
+			});
+
+		});
+
+
+	}
+
+});
+
 
 module.exports = router;
