@@ -94,7 +94,7 @@ router.get('/read/:no', function(req, res, next){
 				var sql ="select member_id, value, date from review where product_no =?"
 				connection.query(sql, [no], function(err, review){
 					if(err) console.error(err);
-					res.render('read', { title: "WATCH SHOP", row: row[0], review:review, authid: req.session.authid, authadmin:req.session.authadmin});
+					res.render('read', { title: "WATCH SHOP", row: row[0], review:review, authno:req.session.authno, authid: req.session.authid, authadmin:req.session.authadmin});
 					connection.release();
 
 				})
@@ -184,7 +184,7 @@ router.post('/delete', function(req, res, next){
 			console.log("successfully deleted ");
 
 		});
-*/
+		*/
 
 		pool.getConnection(function (err, connection) {
 			var sql = "delete from product where no=?";
@@ -305,5 +305,41 @@ router.get('/info', function(req, res, next){
 
 });
 
+router.get('/basket', function(req, res, next){
+	if(req.session.authid == undefined){
+		res.redirect('/');
+	}
+	else{
+
+		pool.getConnection(function(err,connection){
+			var sql = "call basketproc(?)";
+			connection.query(sql,[req.session.authid] ,function(err, result){
+				if(err) console.error("삽입 에러 err: "+err);
+			//res.render('main', {title: 'WATCH SHOP', rows:rows, authid: req.session.authid, authadmin:req.session.authadmin});
+			
+			console.log(result);
+			res.render('basket',{title:'WATCH SHOP',result:JSON.stringify(result[0]), authid:req.session.authid, authadmin:req.session.authadmin, authno:req.session.authno});
+			connection.release(); 
+			});
+
+		
+		});
+
+	}
+});
+
+router.post('/basket', function(req, res, next){
+
+	pool.getConnection(function(err,connection){
+		var sql = "insert into basket(member_no, product_no) value(?,?)";
+		connection.query(sql,[req.body.basket_member_id, req.body.basket_product_id] ,function(err, rows){
+			if(err) console.error("삽입 에러 err: "+err);
+			//res.render('main', {title: 'WATCH SHOP', rows:rows, authid: req.session.authid, authadmin:req.session.authadmin});
+			res.redirect('/main');
+			connection.release(); 
+		});
+
+	});
+});
 
 module.exports = router;

@@ -5,8 +5,8 @@ var pool = mysql.createPool({
     connectionLimit: 5,
     host: 'localhost',
     user: 'root',
-    database: 'sedb',
-    password: '4759655'
+    database: 'watchshop',
+    password: '309qkfsoa'
 });
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -38,7 +38,7 @@ router.post('/', function(req, res, next) {
 
           //res.redirect('/board');
           connection.release();
-
+          res.redirect('/');
           // Don't use the connection here, it has been returned to the pool.
       });
     });
