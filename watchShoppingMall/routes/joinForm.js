@@ -5,6 +5,7 @@ var pool = mysql.createPool({
     connectionLimit: 5,
     host: 'localhost',
     user: 'root',
+
     database: 'test',
     password: 'rla102211'
 });
@@ -31,7 +32,9 @@ router.post('/', function(req, res, next) {
   {
       //Use the connection
 
+
       var sqlForInsertBoard = "insert into member(`id`, `passwd`, `name`, `tel`, `address`, `email`, `admin`, `size`, `price`, `texture`, `kind`) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
       connection.query(sqlForInsertBoard,datas, function(err, rows) {
           if(err) console.error("err : " + err);
           console.log("rows : " + JSON.stringify(rows));
