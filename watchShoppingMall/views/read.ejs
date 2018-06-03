@@ -77,7 +77,7 @@
 			<div class="list-group">
 				<a href="/" class="list-group-item">SHOP</a>
 				<a href="#" class="list-group-item">BASKET</a>
-				<a href="#" class="list-group-item">MY INFO</a>
+				<a href="/main/info" class="list-group-item">MY INFO</a>
 			</div>
 
 		</div>
@@ -162,7 +162,7 @@
 														&nbsp;
 														<%= review[i].member_id %>
 														&nbsp;	
-												
+
 														<%= review[i].date %>
 													</td>
 												</tr>
@@ -189,6 +189,7 @@
 								<% }else{			
 								%>
 								<small class="text-muted"><button type="button" id="buy">구매</button></small>
+								<small class="text-muted"><button type="button" id="basket">장바구니</button></small>
 								<%
 							}
 							%>
@@ -229,6 +230,10 @@
 	<input type="hidden" id="reviewValue" name="reviewValue" value=""></input>
 	<input type="hidden" id="reviewDate" name="reviewDate" value=""></input>
 </form>
+<form id="submitBasket" method="post" action="/main/basket">
+	<input type="hidden" id="basket_member_id" name="basket_member_id" value="<%= authno %>"></input>
+	<input type="hidden" id="basket_product_id" name="basket_product_id" value="<%= row.no %>"></input>
+</form>
 
 
 <!-- Bootstrap core JavaScript -->
@@ -254,7 +259,7 @@
 		var con = confirm("<%= row.name %> 상품을 구매하시겠습니까?");
 		if(con == true){
 			var date = dateObject.getFullYear() +"년 " + (dateObject.getMonth()+1) +"월 " + dateObject.getDate() +"일 " + dateObject.getHours() + "시 " + dateObject.getMinutes() +"분 ";  
-
+			alert("구매 되었습니다");
 			$("#buyDate").val(date);
 			$("#buyform").submit();
 		}
@@ -277,6 +282,16 @@
 		$("#updateForm").submit();
 	});
 
+	$("#basket").click(function(){
+		var con = confirm("장바구니에 추가하시겠습니까?");
+		if(con==true){
+		$("#submitBasket").submit();
+		alert("장바구니에 추가되었습니다");
+		}
+		else if(con==false){
+			return;
+		}
+	});
 </script>
 
 

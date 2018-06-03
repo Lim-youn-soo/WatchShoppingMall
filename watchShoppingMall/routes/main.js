@@ -5,8 +5,8 @@ var pool = mysql.createPool({
 	connectionLimit:5,
 	host:'localhost',
 	user:'root',
-	database:'watchshop',
-	password:'309qkfsoa'
+	database:'test',
+	password:'rla102211'
 });
 var session = require('express-session');
 var app = express();
@@ -25,14 +25,17 @@ router.get('/', function (req, res, next) {
 	}
 	else{
 		console.log(req.session.authid);
-		console.log(req.session.authadmin);
+   		console.log(req.session.authadmin);
+
+        //add
+        console.log(req.session.authno);
 
 		pool.getConnection(function(err,connection){
 			var sqlForSelectList = "SELECT no, name, price, information, hit, img FROM product WHERE useflag=0";
 			connection.query(sqlForSelectList, function(err, rows){
 				if(err) console.error("err: "+err);
 				console.log("rows : " + JSON.stringify(rows));
-				res.render('main', {title: 'WATCH SHOP', rows:rows, authid: req.session.authid, authadmin:req.session.authadmin});
+				res.render('main', {title: 'WATCH SHOP', no:req.session.authno, rows:rows, authid: req.session.authid, authadmin:req.session.authadmin});
 				connection.release(); 
 			});
 
@@ -94,7 +97,7 @@ router.get('/read/:no', function(req, res, next){
 				var sql ="select member_id, value, date from review where product_no =?"
 				connection.query(sql, [no], function(err, review){
 					if(err) console.error(err);
-					res.render('read', { title: "WATCH SHOP", row: row[0], review:review, authid: req.session.authid, authadmin:req.session.authadmin});
+					res.render('read', { title: "WATCH SHOP", row: row[0], review:review, authno:req.session.authno, authid: req.session.authid, authadmin:req.session.authadmin});
 					connection.release();
 
 				})
@@ -178,13 +181,13 @@ router.post('/delete', function(req, res, next){
 	else{
 		var no = req.body.no;
 		var img = req.body.img;
-
+		/*
 		fs.unlink('./public/images/'+img, function (err) {
 			if (err) console.log(err);
 			console.log("successfully deleted ");
 
 		});
-
+		*/
 
 		pool.getConnection(function (err, connection) {
 			var sql = "delete from product where no=?";
@@ -268,6 +271,7 @@ router.post('/review',function(req, res, next){
 			connection.query(sql, [no, id, review,date], function (err, result) {
 				if (err) console.error("구매 중 에러 발생 err: ", err);
 				else {
+					connection.release();
 					res.redirect('/main/read/'+no);
 
 				}
@@ -276,6 +280,69 @@ router.post('/review',function(req, res, next){
 
 	}
 
+});
+
+router.get('/info', function(req, res, next){
+	if(req.session.authid == undefined){
+		res.redirect('/');
+	}
+	else{
+		var id = req.session.authid;
+
+		pool.getConnection(function(err, connection){
+			var sql = "call curdemo(?);";
+			connection.query(sql, [id], function(err, result){
+				if(err)console.error("회원 번호 불러오는 중 에러 발생 err: " ,err);
+				else{
+					
+
+					res.render('info', {title:'WATCH SHOP', result:JSON.stringify(result[0]), authid:req.session.authid, authadmin:req.session.authadmin})
+
+				}
+			});
+
+		});
+
+
+	}
+
+});
+
+router.get('/basket', function(req, res, next){
+	if(req.session.authid == undefined){
+		res.redirect('/');
+	}
+	else{
+
+		pool.getConnection(function(err,connection){
+			var sql = "call basketproc(?)";
+			connection.query(sql,[req.session.authid] ,function(err, result){
+				if(err) console.error("삽입 에러 err: "+err);
+			//res.render('main', {title: 'WATCH SHOP', rows:rows, authid: req.session.authid, authadmin:req.session.authadmin});
+			
+			console.log(result);
+			res.render('basket',{title:'WATCH SHOP',result:JSON.stringify(result[0]), authid:req.session.authid, authadmin:req.session.authadmin, authno:req.session.authno});
+			connection.release(); 
+			});
+
+		
+		});
+
+	}
+});
+
+router.post('/basket', function(req, res, next){
+
+	pool.getConnection(function(err,connection){
+		var sql = "insert into basket(member_no, product_no) value(?,?)";
+		connection.query(sql,[req.body.basket_member_id, req.body.basket_product_id] ,function(err, rows){
+			if(err) console.error("삽입 에러 err: "+err);
+			//res.render('main', {title: 'WATCH SHOP', rows:rows, authid: req.session.authid, authadmin:req.session.authadmin});
+			res.redirect('/main');
+			connection.release(); 
+		});
+
+	});
 });
 
 module.exports = router;
