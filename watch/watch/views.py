@@ -24,9 +24,8 @@ def test(request) :
 
     cursor = connection.cursor()
     try:
-        #sql = "select * from member where member_no = " + member_no"
-        sql_size = "select size,price,texture,kind from member"
-        cursor.execute(sql_size)
+        sql_size = "select size,price,texture,kind from member where no=%s"
+        cursor.execute(sql_size, (member_no))
         rows = cursor.fetchone()
         result = list(rows)
         print(result)
