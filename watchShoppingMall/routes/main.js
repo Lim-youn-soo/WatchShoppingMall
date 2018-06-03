@@ -5,8 +5,8 @@ var pool = mysql.createPool({
 	connectionLimit:5,
 	host:'localhost',
 	user:'root',
-	database:'watchshop',
-	password:'309qkfsoa'
+	database:'test',
+	password:'rla102211'
 });
 var session = require('express-session');
 var app = express();
@@ -25,14 +25,17 @@ router.get('/', function (req, res, next) {
 	}
 	else{
 		console.log(req.session.authid);
-		console.log(req.session.authadmin);
+   		console.log(req.session.authadmin);
+
+        //add
+        console.log(req.session.authno);
 
 		pool.getConnection(function(err,connection){
 			var sqlForSelectList = "SELECT no, name, price, information, hit, img FROM product WHERE useflag=0";
 			connection.query(sqlForSelectList, function(err, rows){
 				if(err) console.error("err: "+err);
 				console.log("rows : " + JSON.stringify(rows));
-				res.render('main', {title: 'WATCH SHOP', rows:rows, authid: req.session.authid, authadmin:req.session.authadmin});
+				res.render('main', {title: 'WATCH SHOP', no:req.session.authno, rows:rows, authid: req.session.authid, authadmin:req.session.authadmin});
 				connection.release(); 
 			});
 
